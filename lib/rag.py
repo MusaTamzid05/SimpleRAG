@@ -1,4 +1,5 @@
 from lib.retrival import CorpusRetrival
+from lib.generator import CorpusResponseGenerator
 
 class RAG:
     def __init__(self):
@@ -22,6 +23,8 @@ class CorpusRAG(RAG):
                 path=path,
                 chunk_size=chunk_size
                 )
+        self.generator = CorpusResponseGenerator()
+
 
     def run(self):
         running = True
@@ -31,15 +34,15 @@ class CorpusRAG(RAG):
                 running = False
                 continue
 
-            result = self.retrival.get(query_text=prompt, result_count=2)
+            result = self.retrival.get(query_text=prompt, result_count=5)
             response_list = result["documents"][0]
 
             augmented_data = {
                     "query" : prompt,
                     "context" : "\n".join(response_list)
-
-
                     }
+            response = self.generator.generate(augmented_data=augmented_data)
+            print(f"[*] LLM => {response}")
 
 
 
