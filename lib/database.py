@@ -5,10 +5,10 @@ class VectorDataBase:
         self.name = name
 
     def add(self, document):
-        raise RuntimeError("No implemented")
+        raise RuntimeError("Not implemented")
 
     def get_match(self, query_text, result_count):
-        raise RuntimeError("No implemented")
+        raise RuntimeError("Not implemented")
 
 
 
