@@ -1,15 +1,15 @@
-
+from lib.database import ChromaDB
 
 class Retrival:
     def __init__(self):
         pass
 
-    def get(self, query):
+    def get(self, query, result_count):
         raise RuntimeError("Not implemented")
 
 
 class CorpusRetrival(Retrival):
-    def __init__(self, path, chunk_size):
+    def __init__(self, database_name, path, chunk_size):
         super().__init__()
         corpus_text = ""
 
@@ -25,7 +25,15 @@ class CorpusRetrival(Retrival):
 
         print(f"[*] Total chunks {len(chunks)}")
 
+        self.database = ChromaDB(name=database_name)
+        self.database.add(documents=chunks)
 
+
+    def get(self, query_text, result_count):
+        return self.database.get_match(
+                query_text=query_text,
+                result_count=result_count
+                )
 
 
 
