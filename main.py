@@ -1,15 +1,9 @@
-from lib.retrival import CorpusRetrival
+from lib.rag import CorpusRAG
 
 def main():
-    retrival = CorpusRetrival(path="data/alice.txt", chunk_size=1000, database_name="test")
+    rag = CorpusRAG(path="data/alice.txt", chunk_size=1000, database_name="alice")
+    rag.run()
 
-    while True:
-        prompt = input(">>> ")
-        result = retrival.get(query_text=prompt, result_count=2)
-        response_list = result["documents"][0]
-
-        for index, response in enumerate(response_list):
-            print(f"{index} => {response}")
 
 
 
