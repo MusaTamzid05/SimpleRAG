@@ -34,6 +34,12 @@ class CorpusRAG(RAG):
             result = self.retrival.get(query_text=prompt, result_count=2)
             response_list = result["documents"][0]
 
-            for index, response in enumerate(response_list):
-                print(f"{index} => {response}")
+            augmented_data = {
+                    "query" : prompt,
+                    "context" : "\n".join(response_list)
+
+
+                    }
+
+
 
