@@ -1,5 +1,10 @@
 from lib.database import ChromaDB
 from lib.text_preprocessor import SimpleTextPreprocessor
+from lib.utils import SimpleDirFileReader
+from lib.vectorizer import DocumentVectorizer
+import numpy as np
+import faiss
+
 
 class Retrival:
     def __init__(self):
@@ -41,6 +46,60 @@ class CorpusRetrival(Retrival):
                 query_text=query_text,
                 result_count=result_count
                 )
+
+
+
+class IndexRetrival(Retrival):
+    def __init__(self, dir_path, chunk_size):
+        super().__init__()
+
+        dir_reader = SimpleDirFileReader(dir_path=dir_path)
+        text_list = dir_reader.read()
+        text_preprocessor = SimpleTextPreprocessor()
+
+        print(f"[*] Total text_list for index retrival {len(text_list)}")
+        documents = []
+
+        for text in text_list:
+            if len(text) <= chunk_size:
+                processed_text = text_preprocessor.run(text=text)
+                documents.append(processed_text)
+
+            else:
+                for i in range(0, len(text), chunk_size):
+                    chunk = text[i:i+chunk_size]
+                    processed_text = text_preprocessor.run(text=chunk)
+                    documents.append(processed_text)
+
+        print(f"[*] Total docs for index retrival {len(documents)}")
+
+        self.vectorizer = DocumentVectorizer()
+        self.vectorizer.load_data(src=documents)
+
+        embedded_data  = self.vectorizer.vectorize()
+        embedded_data = np.array(embedded_data).astype("float32")
+        dimention = embedded_data.shape[1]
+
+        self.index = faiss.IndexFlatL2(dimention)
+        self.index.add(embedded_data)
+
+        self.documents = documents
+
+
+
+
+
+
+
+    def get(self, query_text, result_count):
+        vectorize_query = self.vectorizer.vectorize_text(texts=[query_text])
+        vectorize_query = np.array(vectorize_query).astype("float32")
+        _, indices = self.index.search(vectorize_query, k=result_count)
+        results = [self.documents[index] for index in indices[0]]
+
+        return results
+
+
 
 
 
