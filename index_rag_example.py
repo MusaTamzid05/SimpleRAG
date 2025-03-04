@@ -1,12 +1,8 @@
-from lib.retrival import IndexRetrival
+from lib.rag import CorpusIndexRAG
 
 def main():
-    rag = IndexRetrival(dir_path="data", chunk_size=1000)
-    docs = rag.get(query_text="who is alice ?", result_count=5)
-
-    for doc in docs:
-        print(doc)
-        print("-" * 30)
+    rag = CorpusIndexRAG(dir_path="data", chunk_size=1000)
+    rag.run()
 
 
 

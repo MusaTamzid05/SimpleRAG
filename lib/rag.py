@@ -1,5 +1,6 @@
 from lib.retrival import CorpusRetrival
 from lib.generator import CorpusResponseGenerator
+from lib.retrival import IndexRetrival
 
 class RAG:
     def __init__(self):
@@ -40,6 +41,39 @@ class CorpusRAG(RAG):
             augmented_data = {
                     "query" : prompt,
                     "context" : "\n".join(response_list)
+                    }
+            response = self.generator.generate(augmented_data=augmented_data)
+            print(f"[*] LLM => {response}")
+
+
+
+class CorpusIndexRAG(RAG):
+    def __init__(
+            self,
+            dir_path,
+            chunk_size=1000
+            ):
+        super().__init__()
+        self.retrival = IndexRetrival(
+                dir_path=dir_path,
+                chunk_size=chunk_size
+                )
+        self.generator = CorpusResponseGenerator()
+
+
+    def run(self):
+        running = True
+        while running:
+            prompt = input(">>> ")
+            if prompt == "exit":
+                running = False
+                continue
+
+            retrived_list = self.retrival.get(query_text=prompt, result_count=5)
+
+            augmented_data = {
+                    "query" : prompt,
+                    "context" : "\n".join(retrived_list)
                     }
             response = self.generator.generate(augmented_data=augmented_data)
             print(f"[*] LLM => {response}")
