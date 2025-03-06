@@ -4,6 +4,8 @@ from lib.utils import SimpleDirFileReader
 from lib.vectorizer import DocumentVectorizer
 import numpy as np
 import faiss
+import requests
+from bs4 import BeautifulSoup
 
 
 class Retrival:
@@ -99,6 +101,47 @@ class IndexRetrival(Retrival):
 
         return results
 
+
+
+
+class WebRetrival(Retrival):
+    def __init__(self, url_list, database_name,  chunk_size=1000):
+        super().__init__()
+        self.documents = []
+        text_preprocessor = SimpleTextPreprocessor()
+
+        for url in url_list:
+            print(f"[*] Getting {url}")
+            res = requests.get(url)
+
+            if res.status_code != 200:
+                print(f"[X] Error getting {url}")
+                continue
+
+            soup = BeautifulSoup(res.content, "html.parser")
+            text = soup.get_text()
+            processed_text = text_preprocessor.run(text=text)
+
+            if len(processed_text) <= chunk_size:
+                self.documents.append(processed_text)
+            else:
+                for i in range(0, len(processed_text), chunk_size):
+                    chunk = text[i:i+chunk_size]
+                    self.documents.append(chunk)
+
+
+            print(f"[*] Total documents {len(self.documents)}")
+
+            self.database = ChromaDB(name=database_name)
+            self.database.add(documents=self.documents)
+
+
+
+    def get(self, query_text, result_count):
+        return self.database.get_match(
+                query_text=query_text,
+                result_count=result_count
+                )
 
 
 
