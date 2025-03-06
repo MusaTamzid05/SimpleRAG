@@ -1,4 +1,5 @@
 from openai import OpenAI
+import os
 
 class Generator:
     def __init__(self):
@@ -17,19 +18,24 @@ class CorpusResponseGenerator:
                 api_key="Does not matter"
                 )
         self.model_name = "deepseek-r1:7b"
-        self.prompt = "Answer the follwing question based on the context below:\nContext {}\nQuestion {}\nAnswer:"
+
+        with open(os.path.join("prompts", "one.txt"), "r") as f:
+            self.prompt = f.read().strip()
+
 
     def generate(self, augmented_data):
         content = augmented_data["context"]
         query = augmented_data["query"]
 
         response = ""
+        content = self.prompt.format(content, query)
+        print(content)
 
         try:
             chat_response = self.client.chat.completions.create(
                     model=self.model_name,
                     temperature=0.1,
-                    messages= [{"role" : "user", "content" : self.prompt.format(content, query)}]
+                    messages= [{"role" : "user", "content" : content }]
                     )
             response = chat_response.choices[0].message.content.strip()
 

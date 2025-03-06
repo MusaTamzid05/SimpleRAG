@@ -105,7 +105,7 @@ class WebRAG(RAG):
                 running = False
                 continue
 
-            result = self.retrival.get(query_text=prompt, result_count=5)
+            result = self.retrival.get(query_text=prompt, result_count=10)
             response_list = result["documents"][0]
 
             augmented_data = {
