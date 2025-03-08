@@ -2,6 +2,7 @@ from lib.retrival import CorpusRetrival
 from lib.generator import CorpusResponseGenerator
 from lib.retrival import IndexRetrival
 from lib.retrival import WebRetrival
+from lib.retrival import NaiveKeywordRetrival
 
 class RAG:
     def __init__(self):
@@ -114,3 +115,47 @@ class WebRAG(RAG):
                     }
             response = self.generator.generate(augmented_data=augmented_data)
             print(f"[*] LLM => {response}")
+
+
+class NaiveRAG(RAG):
+    def __init__(self, dir_path, retrivel_method, chunk_size=1000):
+        super().__init__()
+
+        if retrivel_method == "keyword":
+            self.retrival = NaiveKeywordRetrival(
+                    dir_path=dir_path,
+                    chunk_size=chunk_size
+                    )
+        else:
+            raise RuntimeError(f"Unknown retrival method {retrivel_method}")
+
+        self.generator = CorpusResponseGenerator()
+
+
+
+    def run(self):
+        running = True
+        while running:
+            prompt = input(">>> ")
+            if prompt == "exit":
+                running = False
+                continue
+
+            response_list = self.retrival.get(query_text=prompt, result_count=10)
+
+            augmented_data = {
+                    "query" : prompt,
+                    "context" : "\n".join(response_list)
+                    }
+            response = self.generator.generate(augmented_data=augmented_data)
+            print(f"[*] LLM => {response}")
+
+
+
+
+
+
+
+
+
+

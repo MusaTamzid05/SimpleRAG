@@ -29,7 +29,6 @@ class CorpusResponseGenerator:
 
         response = ""
         content = self.prompt.format(content, query)
-        print(content)
 
         try:
             chat_response = self.client.chat.completions.create(
