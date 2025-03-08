@@ -6,6 +6,8 @@ import numpy as np
 import faiss
 import requests
 from bs4 import BeautifulSoup
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 class Retrival:
@@ -186,13 +188,37 @@ class NaiveKeywordRetrival(Retrival):
 
 
 
+class NaiveVectorizeRetrival(Retrival):
+    def __init__(self, dir_path, chunk_size=1000):
+        super().__init__()
+        self.documents = []
+        self.text_preprocessor = SimpleTextPreprocessor()
+
+        reader = SimpleDirFileReader(dir_path=dir_path)
+        text_list = reader.read()
+
+        for text in text_list:
+            processed_text = self.text_preprocessor.run(text=text)
+
+            if len(processed_text) <= chunk_size:
+                self.documents.append(processed_text)
+            else:
+                for i in range(0, len(processed_text), chunk_size):
+                    chunk = processed_text[i:i+chunk_size]
+                    self.documents.append(chunk)
 
 
+        self.vectorizer = TfidfVectorizer()
+        self.documents_tfids = self.vectorizer.fit_transform(self.documents)
 
 
+    def get(self, query_text, result_count):
+        query_text = self.text_preprocessor.run(text=query_text)
+        query_tfids = self.vectorizer.transform([query_text])
+        similarities = cosine_similarity(query_tfids, self.documents_tfids).flatten()
+        top_indices = np.argsort(-similarities)[:result_count][::-1]
 
-
-
+        return [self.documents[i] for i in top_indices]
 
 
 

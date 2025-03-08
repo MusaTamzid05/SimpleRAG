@@ -3,6 +3,7 @@ from lib.generator import CorpusResponseGenerator
 from lib.retrival import IndexRetrival
 from lib.retrival import WebRetrival
 from lib.retrival import NaiveKeywordRetrival
+from lib.retrival import NaiveVectorizeRetrival
 
 class RAG:
     def __init__(self):
@@ -126,10 +127,18 @@ class NaiveRAG(RAG):
                     dir_path=dir_path,
                     chunk_size=chunk_size
                     )
+
+        elif retrivel_method == "vectorize":
+            self.retrival = NaiveVectorizeRetrival(
+                    dir_path=dir_path,
+                    chunk_size=chunk_size
+                    )
         else:
             raise RuntimeError(f"Unknown retrival method {retrivel_method}")
 
         self.generator = CorpusResponseGenerator()
+
+        print(f"[*] Naive RAG {retrivel_method}")
 
 
 
