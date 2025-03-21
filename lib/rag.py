@@ -4,6 +4,7 @@ from lib.retrival import IndexRetrival
 from lib.retrival import WebRetrival
 from lib.retrival import NaiveKeywordRetrival
 from lib.retrival import NaiveVectorizeRetrival
+from lib.generator import GroqResponseGenerator
 
 class RAG:
     def __init__(self):
@@ -88,6 +89,7 @@ class WebRAG(RAG):
             self,
             url_list,
             database_name,
+            generator_type,
             chunk_size=1000
             ):
         super().__init__()
@@ -96,7 +98,15 @@ class WebRAG(RAG):
                 url_list=url_list,
                 chunk_size=chunk_size
                 )
-        self.generator = CorpusResponseGenerator()
+
+        if generator_type == "local":
+            self.generator = CorpusResponseGenerator()
+        elif generator_type == "groq":
+            self.generator = GroqResponseGenerator()
+        else:
+            raise RuntimeError(f"Generator type {generator_type} not known")
+
+        print(f"[*] Using Generator {generator_type}")
 
 
     def run(self):
