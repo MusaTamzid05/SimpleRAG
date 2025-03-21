@@ -126,6 +126,7 @@ class WebRAG(RAG):
                     }
             response = self.generator.generate(augmented_data=augmented_data)
             print(f"[*] LLM => {response}")
+            print("*" * 30)
 
 
 class NaiveRAG(RAG):
